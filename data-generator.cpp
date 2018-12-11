@@ -4,8 +4,10 @@
  generate random data up to the specified limit.
  */
 
+#include <boost/filesystem.hpp>
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -22,37 +24,46 @@ int main(int argc, char* argv[])
     const unsigned int mean = std::atoi(argv[2]);
     const unsigned int unity = 1;
 
-    std::minstd_rand0 easy_gen;
-    std::default_random_engine hard_gen;
+    std::cout << "Generating " << total << " B of data with files of mean size " << mean << " B." << std::endl;
 
-    std::uniform_int_distribution<char> name_dist(97,122);
-    std::uniform_int_distribution<char> data_dist(32,126);
+    std::default_random_engine mtgen (time(NULL));
+    std::minstd_rand lcgen (time(NULL));
+
+    std::uniform_int_distribution<char> char_dist(97, 122);
     std::poisson_distribution<unsigned int> size_dist(mean);
 
     std::ofstream summary("summary.log");
+    boost::filesystem::create_directory("data");
 
     unsigned int sum = 0;
-    while (sum < total) {
-        std::string name = "aaaaaaaa.dat";
-        for (int i=0; i<8; i++)
-            name[i] = name_dist(easy_gen);
-        std::ofstream file(name.c_str());
+    unsigned int count = 0;
+    std::string dirname = "data/dddddddd/";
 
-        unsigned int size = sum + 1;
-        while (size > sum) // make sure we don't overstep
-            size = size_dist(hard_gen);
+    while (sum < total) {
+        unsigned int size = size_dist(mtgen);
         size = std::max(unity, size);
 
-        if (sum + size >= total) // always hit the bullseye
+        if (sum + size > total) // always hit the bullseye
             size = std::max(unity, total - sum);
         sum += size;
-
         summary << size << '\t' << sum << '\n';
 
+        if (count % 10000 == 0)
+            for (int i=5; i<13; i++)
+                dirname[i] = char_dist(mtgen);
+        boost::filesystem::create_directory(dirname);
+
+        std::string filename = dirname + "ffffffff.dat";
+        for (int i=14; i<22; i++)
+            filename[i] = char_dist(mtgen);
+        std::ofstream file(filename.c_str());
+
         for (unsigned int i=0; i<size; i++)
-            file << data_dist(easy_gen);
+            file << char_dist(mtgen);
         file << std::endl;
         file.close();
+
+        count++;
     }
 
     summary.close();
