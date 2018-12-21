@@ -5,9 +5,9 @@
 # with mean filesize in the range of 10 KB to 10 MB
 
 # Path variables
-TYM=$(date +%s)                 # UNIX epoch timestamp
-DIR=/home/thor/research/projects/BeeGFS/beegfs-v7-conf/data-generator
+DIR=~/research/projects/BeeGFS/beegfs-conf/data-generator
 BIN=${DIR}/./data-generator     # absolute path to binary file
+TYM=$(date +%s)                 # UNIX epoch timestamp
 LOG="${DIR}/${TYM}_FS-test.log" # absolute path to log file
 
 # CLI options
@@ -16,7 +16,7 @@ FM=1000                         # file-size multiplier
 RP=3                            # number of repetitions
 
 # Real Values
-DSA=( 10 20 50 100 200 500 1000 )
+DSA=( 10 20 50 100 200 500 1000 2000 )
 FSA=( 10 20 50 100 200 500 1000 2000 5000 10000 50000 )
 
 # Total number of jobs
