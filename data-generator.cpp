@@ -13,6 +13,7 @@
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <random>
 #include <string>
 
@@ -24,6 +25,7 @@ void generate(const std::string & dirname, const uint64_t & total, const uint64_
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     uint64_t sum = 0;
     uint64_t n = 0;
+    std::queue<std::string> filenames;
 
     while (sum < total) {
         uint64_t size = size_dist(mtgen);
@@ -36,6 +38,7 @@ void generate(const std::string & dirname, const uint64_t & total, const uint64_
         for (int i=0; i<8; i++)
             filename[i] = char_dist(mtgen);
         std::ofstream file((dirname + "/" + filename).c_str());
+        filenames.push(filename);
 
         char* buffer = new char[size];
         for (uint64_t i=0; i<size-1; i++)
@@ -52,6 +55,12 @@ void generate(const std::string & dirname, const uint64_t & total, const uint64_
     total_actual = sum;
     mean_actual = double(sum) / n;
     elapsed = delta.count();
+
+    while (filenames.size() != 0) {
+        std::string filename = filenames.front();
+        boost::filesystem::remove((dirname + "/" + filename).c_str());
+        filenames.pop();
+    }
 }
 
 int main(int argc, char* argv[])
@@ -82,7 +91,7 @@ int main(int argc, char* argv[])
 
         generate(dirname, total, mean, mtgen, lcgen, char_dist, size_dist, totals[i], means[i], elapsed[i]);
 
-        boost::filesystem::remove_all(dirname);
+        boost::filesystem::remove(dirname);
     }
 
     double eavg = 0., mavg = 0.;
