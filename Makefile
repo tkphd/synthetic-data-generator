@@ -1,5 +1,10 @@
+CXXOPT = -O3 -Wall
+
 data-generator: data-generator.cpp
-	g++ -O3 -Wall $< -o $@ -lboost_system -lboost_filesystem
+	g++  $(CXXOPT) $< -o $@ -lboost_system -lboost_filesystem
+
+profile: CXXOPT = -O1 -g
+profile: data-generator
 
 .PHONY: clean
 clean:
