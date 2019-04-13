@@ -41,7 +41,7 @@ do
         filesize=$(( datasize/(i*j) ))
         printf "%2d/${NJ} " ${n}
         /usr/bin/time -f'     (%E wall, %U user, %S sys)' \
-                      ${BIN} ${datasize} ${filesize} ${RP} >> "${LOG}"
+                      ${BIN} -t ${datasize} -m ${filesize} -r ${RP} >> "${LOG}"
         n=$(( n+1 ))
     done
 done
