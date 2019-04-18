@@ -19,7 +19,7 @@
 #include <random>
 #include <string>
 
-void generate(const std::string & dirname, const uint64_t & total, const uint64_t & mean,
+void generate(const std::string & dirname, const uint64_t & total, const uint64_t & mean, const uint64_t & w,
               std::default_random_engine & mtgen, std::minstd_rand & lcgen,
               std::uniform_int_distribution<char> & char_dist, std::poisson_distribution<uint64_t> & size_dist,
               uint64_t & total_actual, double & mean_actual, double & time_create, std::queue<std::string> & files)
@@ -43,7 +43,7 @@ void generate(const std::string & dirname, const uint64_t & total, const uint64_
 
         char* buffer = new char[size];
         for (uint64_t i = 0; i < size-1; i++)
-            buffer[i] = char_dist(mtgen);
+            buffer[i] = (i % w == 0) ? '\n' : char_dist(mtgen);
         buffer[size-1] = '\n';
         file.write(buffer, size);
         file.close();
@@ -60,9 +60,10 @@ void generate(const std::string & dirname, const uint64_t & total, const uint64_
 
 int main(int argc, char* argv[])
 {
-    const char* valid_opts = "t:m:r:s:hd";
+    const char* valid_opts = "t:m:r:s:w:hd";
     int o;
 
+    uint64_t wval = 100;
     uint64_t tval = 1000000;
     uint64_t sval = time(NULL);
     uint64_t mval = 10000;
@@ -89,6 +90,13 @@ int main(int argc, char* argv[])
             if (optarg)
                 sval = std::atol(optarg) ;
             break;
+        case 'w':
+            if (optarg)
+                wval = std::atol(optarg);
+            break;
+        case 'd':
+            dval = 1;
+            break;
         case 'h':
             printf("Usage: %s [OPTIONS]\n", argv[0]);
             printf("Options:\n");
@@ -96,12 +104,10 @@ int main(int argc, char* argv[])
             printf("         -m mean        mean file size (B)\n");
             printf("         -r reps        number of repetitions\n");
             printf("         -s seed        random number generator seed\n");
+            printf("         -w wrap        wrap lines at w chars\n");
             printf("         -d             delete data before exiting\n");
             printf("         -h             print this message and exit\n");
             std::exit(0);
-        case 'd':
-            dval = 1;
-            break;
         }
     }
 
@@ -112,6 +118,7 @@ int main(int argc, char* argv[])
         printf("         -m mean        mean file size (B)\n");
         printf("         -r reps        number of repetitions\n");
         printf("         -s seed        random number generator seed\n");
+        printf("         -w wrap        wrap lines at w chars\n");
         printf("         -d             delete data before exiting\n");
         printf("         -h             print this message and exit\n");
         std::exit(1);
@@ -120,6 +127,7 @@ int main(int argc, char* argv[])
     const uint64_t total(tval);
     const uint64_t seed (sval);
     const uint64_t mean (mval);
+    const uint64_t wrap (wval);
     const uint8_t  reps (rval);
     const bool     clean(dval);
     std::queue<std::string> paths;
@@ -146,7 +154,7 @@ int main(int argc, char* argv[])
         boost::filesystem::create_directory(subname);
         paths.push(subname);
 
-        generate(subname, total, mean,
+        generate(subname, total, mean, wrap,
                  mtgen, lcgen, char_dist, size_dist,
                  totals[i], means[i], time_create[i], files);
     }
