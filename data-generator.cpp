@@ -170,20 +170,15 @@ int main(int argc, char* argv[])
     mavg /= reps;
     tavg /= reps;
 
-    std::string logname = dirname + ".log";
-    printf("Writing summary to %s\n", logname.c_str());
-    FILE* logfile = fopen(logname.c_str(), "w");
-
-    fprintf(logfile, "%-12lu %-15f", tavg, mavg);
+    printf("%-12lu %-15f", tavg, mavg);
 
     double sumsq = 0.;
     for (uint8_t i = 0; i < reps; i++) {
-        fprintf(logfile, " %-12f", time_create[i]);
+        printf(" %-12f", time_create[i]);
         sumsq += (time_create[i] - cavg) * (time_create[i] - cavg) / reps;
     }
 
-    fprintf(logfile, " %-12f %-12f\n", cavg, std::sqrt(sumsq));
-    fflush(logfile);
+    printf(" %-12f %-12f\n", cavg, std::sqrt(sumsq));
 
     if (clean) {
         while (files.size() != 0) {
@@ -202,7 +197,6 @@ int main(int argc, char* argv[])
     delete [] means;
     delete [] time_create;
     delete [] totals;
-    fclose(logfile);
 
     return 0;
 }

@@ -35,7 +35,7 @@ echo -e "write        stdev        remove" >> "${LOG}"
 n=1
 for j in "${NFA[@]}"
 do
-    datasize=$(( 100*DM ))
+    datasize=$(( j*DM ))
     for i in "${LGA[@]}"
     do
         filesize=$(( datasize/(i*j) ))
